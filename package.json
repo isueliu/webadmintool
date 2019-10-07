@@ -1,0 +1,9 @@
+{
+  "name": "shell_front",
+  "version": "1.0.0",
+  "description": "use shell create base page on vue",
+  "main": "index.js",
+  "author": "liuhanru",
+  "license": "MIT",
+  "private": true
+}
