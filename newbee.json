@@ -1,7 +1,15 @@
 {
   "name":"company",
   "mode":"vue",
-  "routePath":"/company",
+  "routePath":"/customerService/callcenter/company",
+  "title":"全部呼叫记录",
+  "breadcrumb":[{
+    "path":"/customerService",
+    "label":"服务系统"
+  },{
+    "path":"/callcenter",
+    "label":"呼叫中心"
+  }],
   "data":[
     {
       "name":"id",

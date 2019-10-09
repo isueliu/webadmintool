@@ -11,8 +11,18 @@ const checkPathExist = async (thePath) => {
 
 const fileName = (name="component", type='list', mode="vue") => {
   return [name.substring(0, 1).toUpperCase(), name.substring(1), type.substring(0,1).toUpperCase(), type.substring(1), 'Component','.', mode].join('');
-}
+};
+
+const writeFile = async (thePath, data) => {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(thePath, data, (err) => {
+      resolve(!err);
+    });
+  });
+};
 
 exports.checkPathExist = checkPathExist;
 exports.fileName = fileName;
+exports.writeFile = writeFile;
+
 
