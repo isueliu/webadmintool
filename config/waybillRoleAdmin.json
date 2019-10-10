@@ -1,0 +1,46 @@
+{
+  "name":"admin",
+  "nameAppend":"RoleList",
+  "mode":"vue",
+  "routePath":"/waybill/admin/roleList",
+  "title":"角色权限",
+  "breadcrumb":[{
+    "path":"/waybil",
+    "label":"运单系统"
+  }, {
+    "path":"/admin",
+    "label":"后台用户管理"
+  }],
+  "data":[
+    {
+      "name":"id",
+      "key":true,
+      "type":"string",
+      "defaultValue":"",
+      "title":"标识",
+      "hideInQuery":true,
+      "hideInInfo":true,
+      "hideInList":true
+    },{
+      "name":"roleType",
+      "type":"string",
+      "defaultValue":"",
+      "title":"用户角色",
+      "hideInInfo":true
+    },{
+      "name":"createdAt",
+      "type":"string",
+      "defaultValue":"",
+      "title":"创建时间",
+      "hideInQuery":true,
+      "hideInInfo":true
+    },{
+      "name":"auditRange",
+      "type":"string",
+      "defaultValue":"",
+      "title":"角色权限",
+      "hideInQuery":true,
+      "hideInInfo":true
+    }
+  ]
+}

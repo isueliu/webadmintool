@@ -6,7 +6,7 @@ const util = require('./util');
 const vue = require('./vue');
 
 const exportQueryList = async (dataConfig, directoryBase='./') => {
-  const queryListFilePath = path.resolve(directoryBase, util.fileName(dataConfig.name, 'queryList', dataConfig.mode || 'vue'));
+  const queryListFilePath = path.resolve(directoryBase, util.fileName(dataConfig.name, dataConfig.nameAppend || 'QueryList', dataConfig.mode || 'vue'));
   console.log(queryListFilePath);
   const hasTheFile = await util.checkPathExist(queryListFilePath);
   if (hasTheFile) {
@@ -17,7 +17,7 @@ const exportQueryList = async (dataConfig, directoryBase='./') => {
 };
 
 const generateQueryListFileInfo = async (dataConfig) => {
-  return vue.generateFileContent(dataConfig);
+  return vue.generateQueryFileContent(dataConfig);
 };
 
 exports.exportQueryList = exportQueryList;

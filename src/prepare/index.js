@@ -36,6 +36,7 @@ const prepareEnv = async (config) => {
   const hasTarget = await checkFileExist(config.targetPath);
   if (!hasTarget) {
     const preparedTarget = await createDirectory(config.targetPath);
+    console.log(hasJson, preparedTarget);
     return hasJson && preparedTarget;
   }
   return hasJson;

@@ -39,7 +39,7 @@ const templateObj = {
         table:{
           begin:`      <el-table  border :data="pageResult.showList" ref="multipleTable" style="width: 100%">
 `,
-          item:`        <el-table-column $type="index" $fixed prop="$prop" label="$label"></el-table-column>
+          item:`        <el-table-column $type $fixed prop="$prop" label="$label"></el-table-column>
 `,
           end:`      </el-table>
 `,
@@ -60,7 +60,8 @@ const templateObj = {
     begin:`<script>
 export default {
 `,
-    name:`  name:'callingCenterListAll',`,
+    name:`  name:':$name',
+`,
     data: {
       begin:`  data: function() {
     return {
@@ -78,7 +79,8 @@ export default {
         current:0,
         size:20,
         total: 800,
-        showList:[{`,
+        showList:[{
+`,
         item:`          $name:"$value",
 `,
         end:`        }]
