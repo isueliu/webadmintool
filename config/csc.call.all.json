@@ -1,6 +1,6 @@
 {
-  "name":"callcenter",
-  "nameAppend":"All",
+  "name":"callCenter",
+  "nameAppend":"AllCall",
   "mode":"vue",
   "routePath":"/customerService/callcenter/alllist",
   "title":"全部呼叫记录",
