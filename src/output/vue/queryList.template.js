@@ -1,7 +1,7 @@
 const templateObj = {
   template: {
     begin:`<template>
-<div  v-loading="loading">
+<div  v-loading="meta.loading">
  `,
     breadcrumb:{
       begin:`  <el-breadcrumb separator="/">
@@ -39,7 +39,14 @@ const templateObj = {
         table:{
           begin:`      <el-table  border :data="pageResult.showList" ref="multipleTable" style="width: 100%">
 `,
-          item:`        <el-table-column $type $fixed prop="$prop" label="$label"></el-table-column>
+          item:`        <el-table-column $type $fixed prop="$prop" label="$label" width="100"></el-table-column>
+`,
+          operation:`        <el-table-column fixed="right" label="操作" width="120">
+          <template slot-scope="scope">
+            <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
+            <el-button @click="handleClickEdit(scope.row)" type="text" size="small">编辑</el-button>
+          </template>
+        </el-table-column>
 `,
           end:`      </el-table>
 `,
@@ -60,11 +67,14 @@ const templateObj = {
     begin:`<script>
 export default {
 `,
-    name:`  name:':$name',
+    name:`  name:'$name',
 `,
     data: {
       begin:`  data: function() {
     return {
+      meta:{
+        loading:false,
+      },
 `,
       queryModel:{
         begin:`      queryModel: {
@@ -92,13 +102,58 @@ export default {
 `
     },
     end:`  methods: {
-    handleSizeChange: function(){
+    handleSizeChange: function(newSize, event ){
+      this.pageResult.size = newSize;
+      this.pageResult.current = 0;
+      this.search();
     },
-    handleCurrentChange: function(){
+    handleCurrentChange: function(gotoPage, event){
+      console.log(gotoPage, event);
+      this.pageResult.current = gotoPage;
+      this.search();
+    },
+    searchApi: function() {
+      //这里准备参数，并处理具体调用axios接口。如果过于复杂，建议适当结构化
+      return new Promise((resolve, reject) => {
+        setTimeout(resolve, 1000, {
+          current:0,
+          size:20,
+          total:0,
+          showList:[]
+        });
+      });
+    },
+    searchApiResultHandler:function(pageResp){
+      console.log(pageResp);
+      const newPageResult = Object.entries(pageResp).reduce((sum, cur) => {
+        sur[cur[0]] = cur[1];
+        return sum;
+      },{});
+      this.pageResult = newPageResult;
+      return this.pageResult;
     },
     search: function(){
+      this.meta.loading = true;
+      const vue = this;
+      vue.searchApi().then((resp) => {
+        return vue.searchApiResultHandler(resp);
+      }).then(() => {
+        vue.meta.loading = false;
+      });
     },
     clearFilter: function() {
+      const queryModel =this.queryModel;
+      const newQueryModel = Object.keys(queryModel).reduce((sum, cur) => {
+        sum[cur] = undefined;
+        return sum;
+      }, {});
+      this.queryModel = newQueryModel;
+    },
+    handleClick: function(rowData) {
+      console.log(rowData);
+    },
+    handleClickEdit: function(rowData) {
+      console.log(rowData);
     }
   }
 }

@@ -64,12 +64,12 @@ const fillResult = (dataConfig, result = query.template.content.result) => {
 };
 
 const fillResultTable = (dataConfig, table = query.template.content.result.table) => {
-  const indexItem = table.item.replace("$type", `type="index"`).replace('$label','').replace("$prop","").replace("$fixed","");
+  const indexItem = table.item.replace("$type", `type="index"`).replace('$label','序号').replace("$prop","").replace("$fixed","fixed");
   const tableItemArray = dataConfig.data.filter(ele => !ele.key).filter(ele => !ele.hideInList).map((ele, idx) => {
     let item = table.item.replace("$type", '').replace("$label", ele.title).replace("$prop", ele.name).replace("$fixed", ele.fixed && 'fixed' || '');
     return item;
   });
-  return [table.begin, indexItem, ...tableItemArray, table.end];
+  return [table.begin, indexItem, ...tableItemArray, table.operation, table.end];
 };
 
 const fillResultPage = (dataConfig, page = query.tempalte.content.result.page) => {
