@@ -26,26 +26,28 @@ const templateObj = {
     loading: false,
 `,
       status:{
-        all:`    selectAllAccountStatus: true,
+        all:`    selectAll$domain: true,
 `,
         list:{
-          begin:`    accountStatusList: [
+          begin:`    $domainList: [
 `,
           item:`      {
-        key: 1,
-        label: "启用"
+        key: $key,
+        label: $label
       },
 `,
           end:`    ],
 `
         }
-      }
+      },
+      end:`  },
+`,
     },
     queryModel: {
       begin:`  queryModel: function() {
     return {
 `,
-      item:`      driverName: "",
+      item:`      $domain: '$value',
 `,
       end:`    };
   },
@@ -66,7 +68,7 @@ const convertSetting = {
     upload:{
       begin:`  upload:{
 `,
-      item:`    driverName: "driverName",
+      item:`    $domain: "$domain",
 `,
       end:`  },
 `,
@@ -74,7 +76,7 @@ const convertSetting = {
     download:{
       begin:`  download:{
 `,
-      item:`    driverName: "driverName",
+      item:`    $domain: "$domain",
 `,
       end:`  },
 `,
@@ -87,6 +89,14 @@ const convertSetting = {
   size: 20,
   total: 3,
   showList: []
+};`,
+  export: `
+export {
+  pageModelDefault,
+  convertSetting,
+  mockPageResult,
+  glossary$nameAppend
+}
 `,
 };
 

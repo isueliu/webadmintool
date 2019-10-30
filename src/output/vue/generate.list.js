@@ -141,24 +141,73 @@ const fillControllerDownload = (dataConfig, download=contr.downloadParse) => {
 const generateDataFileContent = (dataConfig={}, templateConfig=datas) => {
   return [
     templateConfig.begin,
-    ...fillDataGlossary(dataConfig, templateConfig.allGlossary)
+    ...fillDataGlossary(dataConfig, templateConfig.allGlossary),
+    ...fillPageModel(dataConfig, templateConfig.pageModel),
+    templateConfig.pageResult,
+    ...fillConvert(dataConfig, templateConfig.convert),
+    templateConfig.mockData,
+    templateConfig.export.replace('$nameAppend', dataConfig.nameAppend)
   ].join('');
 };
 const fillDataGlossary = (dataConfig = {}, allGlossary=datas.allGlossary) => {
   return [
     allGlossary.begin.replace('$nameAppend', dataConfig.nameAppend),
     ...[...dataConfig.query.filter(ele => ele.options), ...dataConfig.table.filter(ele => ele.options)].map(domain => {
-      return 
+      return [
+        allGlossary.glossary.begin.replace('$domain', domain.name),
+        ...domain.options.map(option => {
+          return allGlossary.glossary.item.replace('$glossary', option.name).replace('$value', option.value);
+        }),
+      ].join('');
     }),
     allGlossary.end,
   ];
-  return [...dataConfig.query.filter(ele => ele.options), ...dataConfig.table.filter(ele => ele.options)]
+};
+const fillPageModel = (dataConfig={}, pageModel=datas.pageModel) => {
   return [
-    glossary.begin,
-    ....map(ele => {
-      return glossary.repl
+    pageModel.begin,
+    ...fillPageModelMeta(dataConfig, pageModel.meta),
+    ...fillPageModelQuery(dataConfig, pageModel.queryModel),
+  ];
+};
+const fillPageModelMeta = (dataConfig={}, meta=datas.pageModel.meta) => {
+  return [
+    meta.begin,
+    ...[...dataConfig.query.filter(ele => ele.options), ...dataConfig.table.filter(ele => ele.options)].map(domain=> {
+      return [
+        meta.status.all.replace('$domain', `${domain.name.slice(0,1).toUpperCase()}${domain.name.slice(1)}`),
+        meta.status.list.begin.replace('$domain', domain.name),
+        ...domain.options.map(option => {
+          return meta.status.list.item.replace('$key', option.value).replace('$label',option.label);
+        }),
+        meta.status.list.end
+      ].join('');
     }),
-    glossary.end
+    meta.end
+  ];
+};
+const fillPageModelQuery = (dataConfig={}, query=datas.pageModel.queryModel) => {
+  return [
+    query.begin,
+    ...dataConfig.query.map(ele => {
+      return query.item.replace('$domain', ele.name).replace('$value',ele.defaultValue);
+    }),
+    query.end
+  ];
+};
+const fillConvert = (dataConfig={}, convert=datas.pageModel.contvert) => {
+  return [
+    convert.begin,
+    convert.upload.begin,
+    ...dataConfig.query.map(ele => {
+      return convert.upload.item.replace('$domain', ele.name);
+    }),
+    convert.upload.end,
+    convert.download.begin,
+    ...dataConfig.table.map(ele => {
+      return convert.download.item.replace('$domain', ele.name);
+    }),
+    convert.download.end
   ];
 };
 exports.generateFileContent = generateFileContent;
