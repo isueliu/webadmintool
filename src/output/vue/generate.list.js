@@ -1,5 +1,7 @@
 
 const query = require('./queryList.template.js');
+const contr = require('./lib.conr.template.js');
+const datas = require('./lib.data.template.js');
 
 
 const generateFileContent = async (dataConfig ={}, templateConfig = query) => {
@@ -46,9 +48,10 @@ const fillContent = (dataConfig, content = query.template.content) => {
   ];
   return contentArray;
 };
-const fillFilter = (dataConfig, filter = query.template.content.filter) => {
-  const filterItemArray = dataConfig.data.filter(ele => !ele.key).filter(ele => !ele.hideInQuery).map((ele, idx) => {
-    let item = filter.item.replace("$label", ele.title).replace("$model", ele.name).replace("$filterType", ele.filterType && `type="${ele.filterType}"` || '');
+const fillFilter = (dataConfig, filter = query.template.content.filter, itemMap = query.itemMap || {}) => {
+  const filterItemArray = dataConfig.query.map((ele, idx) => {
+    let itemTemplate = ele.action == 'select' && itemMap[ele.action] || filter.item;
+    let item = itemTemplate.replace("$label", ele.title).replace("$model", ele.name).replace("$filterType", ele.filterType && `type="${ele.filterType}"` || '').replace("$placeholder", ele.placeholder || '');
     return item;
   });
   return [filter.begin, ...filterItemArray, filter.end];
@@ -64,9 +67,9 @@ const fillResult = (dataConfig, result = query.template.content.result) => {
 };
 
 const fillResultTable = (dataConfig, table = query.template.content.result.table) => {
-  const indexItem = table.item.replace("$type", `type="index"`).replace('$label','序号').replace("$prop","").replace("$fixed","fixed");
-  const tableItemArray = dataConfig.data.filter(ele => !ele.key).filter(ele => !ele.hideInList).map((ele, idx) => {
-    let item = table.item.replace("$type", '').replace("$label", ele.title).replace("$prop", ele.name).replace("$fixed", ele.fixed && 'fixed' || '');
+  const indexItem = table.item.replace("$type", `type="index"`).replace('$label','序号').replace("$prop","").replace("$fixed",'fixed="left"').replace('$width', '100');
+  const tableItemArray = dataConfig.table.map((ele, idx) => {
+    let item = table.item.replace("$type", '').replace("$label", ele.title).replace("$prop", ele.name).replace("$fixed", ele.fixed && `fixed="${ele.fixed}"` || '').replace('$width', ele.width || '100');
     return item;
   });
   return [table.begin, indexItem, ...tableItemArray, table.operation, table.end];
@@ -79,16 +82,16 @@ const fillResultPage = (dataConfig, page = query.tempalte.content.result.page) =
 
 const fillScript = (dataConfig, script = query.script) => {
   return [
-    script.begin,
+    script.begin.replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name),
     script.name.replace('$name', `${dataConfig.name}${dataConfig.nameAppend}`),
     ...fillScriptData(dataConfig, script.data),
-    script.end
+    script.end.begin.replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name)
   ];
 };
 
 const fillScriptData = (dataConfig, scriptData = query.script.data) => {
   return [
-    scriptData.begin,
+    scriptData.begin.replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name),
     ...fillScriptDataQueryModel(dataConfig, scriptData.queryModel),
     ...fillScriptDataPageResult(dataConfig, scriptData.pageResult),
     scriptData.end
@@ -96,25 +99,69 @@ const fillScriptData = (dataConfig, scriptData = query.script.data) => {
 };
 
 const fillScriptDataQueryModel = (dataConfig, queryModel = query.script.data.queryModel) => {
-  const queryItemArray = dataConfig.data.filter(ele => !ele.key).filter(ele => !ele.hideInQuery).map((ele, idx) => {
-    return queryModel.item.replace("$name", ele.name);
-  });
-  return [
-    queryModel.begin,
-    ...queryItemArray,
-    queryModel.end
-  ];
+  return queryModel.begin.replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name);
 };
 
 const fillScriptDataPageResult = (dataConfig, pageResult = query.script.data.pageResult) => {
-  const resultItemArray = dataConfig.data.map((ele, idx) => {
-    return pageResult.item.replace("$name", ele.name).replace("$value", ele.defaultValue);
-  });
-  return [
-    pageResult.begin,
-    ...resultItemArray,
-    pageResult.end
-  ];
+  return pageResult.begin..replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name);
 };
 
+const generateContrFileContent = (dataConfig = {}, templateConfig= contr) => {
+  return [
+    templateConfig.begin,
+    ...fillControllerCondition(dataConfig, templateConfig.condition),
+    templateConfig.uploadParams.replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name),
+    ...fillControllerDownload(dataConfig, templateConfig.downloadParse),
+    templateConfig.queryPage.replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name),
+    templateConfig.updateInfo.replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name),
+    templateConfig.end.replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name),
+  ].join('');
+};
+
+const fillControllerCondition = (dataConfig, condition=contr.condition) => {
+  return [
+    ...dataConfig.query.filter(ele => ele.options),
+    ...dataConfig.table.filter(ele => ele.options)
+  ].map(ele => {
+    return condition.replace('$nameAppend', dataConfig.nameAppend).replace('$name', dataConfig.name).replace('$domain', ele.name);
+  });
+};
+const fillControllerDownload = (dataConfig, download=contr.downloadParse) => {
+  return [
+    download.begin,
+    ...dataConfig.table.filter(ele => ele.format == 'map').map(ele => {
+      return download.map.replace('$domain', ele.name);
+    }),
+    ...dataConfig.table.filter(ele => ele.format == 'date').map(ele => {
+      return download.date.replace('$domain', ele.name);
+    }),
+    download.end
+  ];
+};
+const generateDataFileContent = (dataConfig={}, templateConfig=datas) => {
+  return [
+    templateConfig.begin,
+    ...fillDataGlossary(dataConfig, templateConfig.allGlossary)
+  ].join('');
+};
+const fillDataGlossary = (dataConfig = {}, allGlossary=datas.allGlossary) => {
+  return [
+    allGlossary.begin.replace('$nameAppend', dataConfig.nameAppend),
+    ...[...dataConfig.query.filter(ele => ele.options), ...dataConfig.table.filter(ele => ele.options)].map(domain => {
+      return 
+    }),
+    allGlossary.end,
+  ];
+  return [...dataConfig.query.filter(ele => ele.options), ...dataConfig.table.filter(ele => ele.options)]
+  return [
+    glossary.begin,
+    ....map(ele => {
+      return glossary.repl
+    }),
+    glossary.end
+  ];
+};
 exports.generateFileContent = generateFileContent;
+exports.generateContrFileContent = generateContrFileContent;
+exports.generateDataFileContent = generateDataFileContent;
+

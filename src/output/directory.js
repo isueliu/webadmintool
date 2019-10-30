@@ -10,13 +10,19 @@ const prepareDirectory = async (baseConfig, dataConfig) => {
     if (hasTheDirect) {
       return pathOfTarget;
     }
-    return new Promise((resolve, reject) => {
+    let fileBase = new Promise((resolve, reject) => {
       fs.mkdir(pathOfTarget, { recursive:true }, (err) => {
         resolve(!err && pathOfTarget);
       });
     });
+    let libBase = new Promise((resolve, reject) => {
+      fs.mkdir(path.resolve(pathOfTarget, 'lib'), { recursive:true }, (err) => {
+        resolve(!err && pathOfTarget);
+      });
+    });
+    return Promise.all([fileBase, libBase]);
   });
   return preparePromise;
-}
+};
 
 exports.prepareDirectory = prepareDirectory;

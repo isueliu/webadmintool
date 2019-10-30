@@ -20,4 +20,42 @@ const generateQueryListFileInfo = async (dataConfig) => {
   return vue.generateQueryFileContent(dataConfig);
 };
 
+const exportQueryLib = async (dataConfig, directoryBase='./') => {
+  let dataLib = await exportQueryData(dataConfig, directoryBase);
+  let contrLib = await exportQueryControl(dataConfig, directoryBase);
+  return [dataLib, contrLib];
+};
+
+const exportQueryData = async (dataConfig, directoryBase='./') => {
+  const dataFilePath = path.resolve(directoryBase, util.fileName("data.", dataConfig.nameAppend , 'js', ''));
+  console.log(dataFilePath);
+  const hasTheFile = await util.checkPathExist(dataFilePath);
+  if (hasTheFile) {
+    console.log('the file', hasTheFile, 'will be replaced');
+  }
+  const fileContent = await generateQueryLibDataFileInfo(dataConfig);
+  return util.writeFile(dataFilePath, fileContent);
+}; 
+
+const generateQueryLibDataFileInfo = async (dataConfig) => {
+  return vue.generateQueryLibDataContent(dataConfig);
+};
+
+const exportQueryControl = async (dataConfig, directoryBase='./') => {
+  const contrFilePath = path.resolve(directoryBase, util.fileName("contr.", dataConfig.nameAppend , 'js', ''));
+  console.log(contrFilePath);
+  const hasTheFile = await util.checkPathExist(contrFilePath);
+  if (hasTheFile) {
+    console.log('the file', hasTheFile, 'will be replaced');
+  }
+  const fileContent = await generateQueryLibContrFileInfo(dataConfig);
+  return util.writeFile(contrFilePath, fileContent);
+}; 
+
+const generateQueryLibContrFileInfo = async (contrConfig) => {
+  return vue.generateQueryLibContrContent(contrConfig);
+};
+
 exports.exportQueryList = exportQueryList;
+exports.exportQueryLib = exportQueryLib;
+

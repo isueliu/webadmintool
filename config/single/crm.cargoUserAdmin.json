@@ -52,7 +52,7 @@
       "title":"创建时间",
       "hideInInfo":true
     },{
-      "name":"postType",
+      "name":"positionType",
       "type":"string",
       "defaultValue":"",
       "title":"岗位角色",

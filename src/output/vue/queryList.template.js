@@ -1,4 +1,23 @@
 const templateObj = {
+  itemMap: {
+    item:`      <el-col :span="8">
+        <label>$label</label>
+        <el-select
+          v-model="queryModel.$model"
+          placeholder="$placeholder"
+          filterable
+          :loading="meta.$modelConfig.loading"
+          >
+          <el-option
+            v-for="option in meta.$modelConfig.options"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+            ></el-option>
+        </el-select>
+      </el-col>
+`,
+  },
   template: {
     begin:`<template>
 <div  v-loading="meta.loading">
@@ -39,7 +58,7 @@ const templateObj = {
         table:{
           begin:`      <el-table  border :data="pageResult.showList" ref="multipleTable" style="width: 100%">
 `,
-          item:`        <el-table-column $type $fixed prop="$prop" label="$label" width="100"></el-table-column>
+          item:`        <el-table-column $type $fixed prop="$prop" label="$label" width="$width"></el-table-column>
 `,
           operation:`        <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
@@ -65,6 +84,8 @@ const templateObj = {
   },
   script:{
     begin:`<script>
+import { $name$nameAppendController } './contr.js';
+import { $name$nameAppendData } './data.js';
 export default {
 `,
     name:`  name:'$name',
@@ -73,27 +94,17 @@ export default {
       begin:`  data: function() {
     return {
       meta:{
-        loading:false,
+        ...$name$nameAppendData.pageModelDefault.meta
       },
 `,
       queryModel:{
         begin:`      queryModel: {
-`,
-        item:`        $name:"",
-`,
-        end:`      },
+        ...$name$nameAppendData.pageModelDefault.queryModel()
 `,
       },
       pageResult:{
         begin:`      pageResult: {
-        current:0,
-        size:20,
-        total: 800,
-        showList:[{
-`,
-        item:`          $name:"$value",
-`,
-        end:`        }]
+        ...$name$nameAppendData.pageModelDefault.pageResult()
       }
 `
       },
@@ -101,7 +112,11 @@ export default {
   },
 `
     },
-    end:`  methods: {
+    end:`  mounted(){
+    const vue = this;
+    vue.search();
+  },
+  methods: {
     handleSizeChange: function(newSize, event ){
       this.pageResult.size = newSize;
       this.pageResult.current = 0;
@@ -113,22 +128,11 @@ export default {
       this.search();
     },
     searchApi: function() {
-      //这里准备参数，并处理具体调用axios接口。如果过于复杂，建议适当结构化
-      return new Promise((resolve, reject) => {
-        setTimeout(resolve, 1000, {
-          current:0,
-          size:20,
-          total:0,
-          showList:[]
-        });
-      });
+      return $name$nameAppendController.queryPageInfo();
     },
     searchApiResultHandler:function(pageResp){
       console.log(pageResp);
-      const newPageResult = Object.entries(pageResp).reduce((sum, cur) => {
-        sur[cur[0]] = cur[1];
-        return sum;
-      },{});
+      const newPageResult = $name$nameAppendController.downloadParse(pageResp);
       this.pageResult = newPageResult;
       return this.pageResult;
     },
@@ -143,10 +147,7 @@ export default {
     },
     clearFilter: function() {
       const queryModel =this.queryModel;
-      const newQueryModel = Object.keys(queryModel).reduce((sum, cur) => {
-        sum[cur] = undefined;
-        return sum;
-      }, {});
+      const newQueryModel = $name$nameAppendData.pageModelDefault.queryModel();
       this.queryModel = newQueryModel;
     },
     handleClick: function(rowData) {
