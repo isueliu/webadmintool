@@ -21,13 +21,14 @@ const generateQueryListFileInfo = async (dataConfig) => {
 };
 
 const exportQueryLib = async (dataConfig, directoryBase='./') => {
+  console.log(directoryBase);
   let dataLib = await exportQueryData(dataConfig, directoryBase);
   let contrLib = await exportQueryControl(dataConfig, directoryBase);
   return [dataLib, contrLib];
 };
 
 const exportQueryData = async (dataConfig, directoryBase='./') => {
-  const dataFilePath = path.resolve(directoryBase, util.fileName("data.", dataConfig.nameAppend , 'js', ''));
+  const dataFilePath = path.resolve(directoryBase, util.fileNameBase("data", dataConfig.nameAppend.toLowerCase(), 'js', ''));
   console.log(dataFilePath);
   const hasTheFile = await util.checkPathExist(dataFilePath);
   if (hasTheFile) {
@@ -42,7 +43,7 @@ const generateQueryLibDataFileInfo = async (dataConfig) => {
 };
 
 const exportQueryControl = async (dataConfig, directoryBase='./') => {
-  const contrFilePath = path.resolve(directoryBase, util.fileName("contr.", dataConfig.nameAppend , 'js', ''));
+  const contrFilePath = path.resolve(directoryBase, util.fileNameBase("contr", dataConfig.nameAppend.toLowerCase(), 'js', ''));
   console.log(contrFilePath);
   const hasTheFile = await util.checkPathExist(contrFilePath);
   if (hasTheFile) {

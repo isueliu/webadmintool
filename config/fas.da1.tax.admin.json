@@ -20,9 +20,14 @@
   },{
     "name":"invoiceType",
     "type":"string",
-    "defaultValue":'',
+    "defaultValue":"",
     "title":"发票类型",
     "action":"select",
+    "options": [{
+      "label":"增值税专票", "value":"1", "name":"special"
+    },{
+      "label":"增值税普票", "value":"2", "name":"normal"
+    }],
     "placeholder":""
   },{
     "name":"invoiceApplier",
@@ -71,6 +76,7 @@
     "type":"array",
     "defaultValue":[],
     "title":"开票状态",
+    "action":"map",
     "options": [{
       "label":"审核中", "value":"1", "name":"auditing"
     },{
@@ -80,7 +86,7 @@
     },{
       "label":"已取消", "value":"8", "name":"canceled"
     },{
-      "label":"审核失败", "value":"16", "name":"failed",
+      "label":"审核失败", "value":"16", "name":"failed"
     }],
     "placeholder":""
   }],
@@ -144,17 +150,17 @@
     "type":"string",
     "defaultValue":"",
     "title":"申请时间",
-    "format":"date",
+    "format":"date"
   },{
     "name":"invoiceCode",
     "type":"string",
     "defaultValue":"",
     "title":"发票号码"
   },{
-    "name":"ivoiceStatus",
+    "name":"invoiceStatus",
     "type":"string",
     "defaultValue":"",
     "title":"开票状态",
-    "format":"map",
+    "format":"map"
   }]
 }

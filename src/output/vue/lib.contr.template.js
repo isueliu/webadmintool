@@ -18,11 +18,11 @@ const reducer = (sum, cur) => {
 };
 `,
   condition:`
-const $domainMap = defaultData.$name$nameAppend.pageModelDefault.meta.$domainList.reduce(reducer, {});
+const $domainMap = defaultData.$name$nameAppendData.pageModelDefault.meta.$domainList.reduce(reducer, {});
 `,
   uploadParams:`
 const uploadParams = (queryModel, pageSetting) => {
-  const uploadMap = defaultData.$name$nameAppend.convertSetting.upload||{};
+  const uploadMap = defaultData.$name$nameAppendData.convertSetting.upload||{};
   return {
     ...Object.entries(uploadMap).reduce((sum, cur) => {
       sum[cur[0]] = queryModel[cur[1]];
@@ -41,8 +41,10 @@ const downloadParse = (respJson) => {
       return {
         ...ele,
 `,
-    map:`        $domainLabel:$domainMap[ele.$domain],`,
-    date:`        $domainLabel:formatDateFromMillis[ele.$domain],`,
+    map:`        $domainLabel:$domainMap[ele.$domain],
+`,
+    date:`        $domainLabel:formatDateFromMillis[ele.$domain],
+`,
     end:`
       };
     }),
@@ -54,7 +56,7 @@ const downloadParse = (respJson) => {
 const query$nameAppendPage = (queryModel, pageSetting) => {
   const params = uploadParams(queryModel, pageSetting);
   return mockService.delayEvaluate(() => {
-    return defaultData.$name$nameAppendDefault.mockPageResult;
+    return defaultData.$name$nameAppendData.mockPageResult;
   }, 1);
 };
 `,

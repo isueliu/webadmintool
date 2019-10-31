@@ -28,17 +28,25 @@ const templateObj = {
       status:{
         all:`    selectAll$domain: true,
 `,
+        load:`    $domainLoading: false,
+`,
         list:{
           begin:`    $domainList: [
 `,
           item:`      {
-        key: $key,
-        label: $label
+        key: glossary$nameAppend.$domain.$glossary,
+        value: glossary$nameAppend.$domain.$glossary,
+        label: "$label"
       },
 `,
           end:`    ],
 `
-        }
+        },
+        aspect:`    $domainAspect: {
+      label:'$label',
+      all:'全部'
+    },
+`,
       },
       end:`  },
 `,
@@ -59,7 +67,8 @@ const templateObj = {
     total: 0,
     showList:[]
   },
-`
+`,
+    end:`};`
   },
   convert: {
     begin:`

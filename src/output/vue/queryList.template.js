@@ -1,22 +1,29 @@
 const templateObj = {
   itemMap: {
-    item:`      <el-col :span="8">
-        <label>$label</label>
-        <el-select
-          v-model="queryModel.$model"
-          placeholder="$placeholder"
-          filterable
-          :loading="meta.$modelConfig.loading"
-          >
-          <el-option
-            v-for="option in meta.$modelConfig.options"
-            :key="option.value"
-            :label="option.label"
-            :value="option.value"
-            ></el-option>
-        </el-select>
-      </el-col>
+    select:`          <el-col :span="8">
+            <label>$label</label>
+            <el-select
+              v-model="queryModel.$model"
+              placeholder="$placeholder"
+              filterable
+              :loading="meta.$modelLoading"
+              >
+              <el-option
+                v-for="option in meta.$modelList"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+                ></el-option>
+            </el-select>
+          </el-col>
 `,
+    map:`            <query-tag
+              :aspectInfo="meta.$modelAspect"
+              :tagOptions="meta.$modelList"
+              v-model="queryModel.$model"
+              :span="12"
+              />
+`
   },
   template: {
     begin:`<template>
@@ -40,7 +47,7 @@ const templateObj = {
 `,
         item:`          <el-col :span="8">
             <label>$label</label>
-            <el-input v-model="queryModel.$model" placeholder="" class="input" $filterType></el-input>
+            <el-input v-model="queryModel.$model" placeholder="$placeholder" class="input" $filterType></el-input>
           </el-col>
 `,
         end:`        </el-row>
@@ -58,7 +65,7 @@ const templateObj = {
         table:{
           begin:`      <el-table  border :data="pageResult.showList" ref="multipleTable" style="width: 100%">
 `,
-          item:`        <el-table-column $type $fixed prop="$prop" label="$label" width="$width"></el-table-column>
+          item:`        <el-table-column$type$fixed prop="$prop" label="$label" width="$width"></el-table-column>
 `,
           operation:`        <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
@@ -84,11 +91,15 @@ const templateObj = {
   },
   script:{
     begin:`<script>
-import { $name$nameAppendController } './contr.js';
-import { $name$nameAppendData } './data.js';
+import QueryTag from '../../../components/queryTagsComponent.vue';
+import { $name$nameAppendController } from './lib/contr.js';
+import { $name$nameAppendData } from './lib/data.js';
 export default {
 `,
     name:`  name:'$name',
+  components: {
+    QueryTag,
+  },
 `,
     data: {
       begin:`  data: function() {
@@ -100,12 +111,13 @@ export default {
       queryModel:{
         begin:`      queryModel: {
         ...$name$nameAppendData.pageModelDefault.queryModel()
+      },
 `,
       },
       pageResult:{
         begin:`      pageResult: {
-        ...$name$nameAppendData.pageModelDefault.pageResult()
-      }
+        ...$name$nameAppendData.pageModelDefault.pageResult
+      },
 `
       },
       end:`    }
@@ -123,15 +135,14 @@ export default {
       this.search();
     },
     handleCurrentChange: function(gotoPage, event){
-      console.log(gotoPage, event);
       this.pageResult.current = gotoPage;
       this.search();
     },
     searchApi: function() {
-      return $name$nameAppendController.queryPageInfo();
+      const vue = this;
+      return $name$nameAppendController.query$nameAppendPage(vue.queryModel, vue.pageResult);
     },
     searchApiResultHandler:function(pageResp){
-      console.log(pageResp);
       const newPageResult = $name$nameAppendController.downloadParse(pageResp);
       this.pageResult = newPageResult;
       return this.pageResult;
