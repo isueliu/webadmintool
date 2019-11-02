@@ -1,5 +1,6 @@
 
 const query = require('./queryList.template.js');
+const detail = require('./detail.template.js');
 const contr = require('./lib.contr.template.js');
 const datas = require('./lib.data.template.js');
 
@@ -8,8 +9,13 @@ const modelReg = /\$model/gi;
 const nameReg = /\$name/gi;
 const nameAppendReg = /\$nameAppend/gi;
 const glossaryReg = /\$glossary/gi;
+const modelNameReg = /\$modelName/gi;
 
-const generateFileContent = async (dataConfig ={}, templateConfig = query) => {
+const generateFileContent = async (dataConfig ={}, config = query) => {
+  let templateConfig = config;
+  if (dataConfig.detail && dataConfig.detail.length > 0) {
+    templateConfig = detail;
+  };
   return [
     ...fillTemplate(dataConfig, templateConfig.template),
     ...fillScript(dataConfig, templateConfig.script)
@@ -54,7 +60,8 @@ const fillContent = (dataConfig, content = query.template.content) => {
   return contentArray;
 };
 const fillFilter = (dataConfig, filter = query.template.content.filter, itemMap = query.itemMap || {}) => {
-  const filterItemArray = dataConfig.query.map((ele, idx) => {
+  const items = [...dataConfig.query, ...dataConfig.detail];
+  const filterItemArray = items.map((ele, idx) => {
     let itemTemplate = ele.action && itemMap[ele.action] || filter.item;
     let item = itemTemplate.replace("$label", ele.title).replace(modelReg, ele.name).replace("$filterType", ele.filterType && `type="${ele.filterType}"` || '').replace("$placeholder", ele.placeholder || '');
     return item;
@@ -95,16 +102,28 @@ const fillScript = (dataConfig, script = query.script) => {
 };
 
 const fillScriptData = (dataConfig, scriptData = query.script.data) => {
+  let queryInData = [];
+  let aspectInData = [];
+  let detailInData = [];
+  if (dataConfig.query && dataConfig.query.length > 0) {
+    queryInData = fillScriptDataQueryModel(dataConfig, scriptData.queryModel);
+  }
+  if (dataConfig.detail && dataConfig.detail.length > 0) {
+    aspectInData = fillScriptDataQueryModel(dataConfig, scriptData.queryModel, 'aspectModel');
+    detailInData = fillScriptDataQueryModel(dataConfig, scriptData.queryModel, 'detailModel');
+  };
   return [
     scriptData.begin.replace(nameAppendReg, dataConfig.nameAppend).replace(nameReg, dataConfig.name),
-    ...fillScriptDataQueryModel(dataConfig, scriptData.queryModel),
+    ...queryInData,
+    ...aspectInData,
+    ...detailInData,
     ...fillScriptDataPageResult(dataConfig, scriptData.pageResult),
     scriptData.end
   ];
 };
 
-const fillScriptDataQueryModel = (dataConfig, queryModel = query.script.data.queryModel) => {
-  return queryModel.begin.replace(nameAppendReg, dataConfig.nameAppend).replace(nameReg, dataConfig.name);
+const fillScriptDataQueryModel = (dataConfig, queryModel = query.script.data.queryModel, modelName="queryModel") => {
+  return queryModel.begin.replace(nameAppendReg, dataConfig.nameAppend).replace(nameReg, dataConfig.name).replace(modelNameReg, modelName);
 };
 
 const fillScriptDataPageResult = (dataConfig, pageResult = query.script.data.pageResult) => {
@@ -173,6 +192,7 @@ const fillPageModel = (dataConfig={}, pageModel=datas.pageModel) => {
     pageModel.begin,
     ...fillPageModelMeta(dataConfig, pageModel.meta),
     ...fillPageModelQuery(dataConfig, pageModel.queryModel),
+    ...fillPageModelDetail(dataConfig, pageModel.queryModel),
     pageModel.pageResult,
     pageModel.end
   ];
@@ -195,28 +215,50 @@ const fillPageModelMeta = (dataConfig={}, meta=datas.pageModel.meta) => {
   ];
 };
 const fillPageModelQuery = (dataConfig={}, query=datas.pageModel.queryModel) => {
+  if (dataConfig.query && dataConfig.query.length > 0) {
+    return [
+      query.begin.replace('$modelName', 'queryModel'),
+      ...dataConfig.query.map(ele => {
+        let defaultValue = ele.defaultValue;
+        return query.item.replace(domainReg, ele.name).replace('$value',defaultValue);
+      }),
+      query.end
+    ];
+  }
+  return [];
+};
+const fillPageModelDetail = (dataConfig={}, query=datas.pageModel.queryModel) => {
+  // console.log(dataConfig.detail);
+  if (!dataConfig.detail || !dataConfig.detail.length > 0) return [];
   return [
-    query.begin,
-    ...dataConfig.query.map(ele => {
-      let defaultValue = ele.defaultValue;
-      return query.item.replace(domainReg, ele.name).replace('$value',defaultValue);
+    query.begin.replace('$modelName', 'aspectModel'),
+    ...dataConfig.detail.map(ele => {
+      return query.item.replace(domainReg, ele.name).replace('$value',ele.title);
+    }),
+    query.end,
+    query.begin.replace('$modelName', 'detailModel'),
+    ...dataConfig.detail.map(ele => {
+      return query.item.replace(domainReg, ele.name).replace('$value',ele.defaultValue);
     }),
     query.end
   ];
+
 };
 const fillConvert = (dataConfig={}, convert=datas.convert) => {
+  const convertFun = (template, dataConfigList) => {
+    return [
+      template.begin,
+      ...dataConfigList.map(ele => {
+        return template.item.replace(domainReg, ele.name);
+      }),
+      template.end,
+    ];
+  };
   return [
     convert.begin,
-    convert.upload.begin,
-    ...dataConfig.query.map(ele => {
-      return convert.upload.item.replace(domainReg, ele.name);
-    }),
-    convert.upload.end,
-    convert.download.begin,
-    ...dataConfig.table.map(ele => {
-      return convert.download.item.replace(domainReg, ele.name);
-    }),
-    convert.download.end,
+    ...convertFun(convert.upload, dataConfig.query),
+    ...convertFun(convert.detail, dataConfig.detail),
+    ...convertFun(convert.download, dataConfig.table),
     convert.end
   ];
 };

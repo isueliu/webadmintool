@@ -52,7 +52,7 @@ const templateObj = {
 `,
     },
     queryModel: {
-      begin:`  queryModel: function() {
+      begin:`  $modelName: function() {
     return {
 `,
       item:`      $domain: '$value',
@@ -76,6 +76,14 @@ const convertSetting = {
 `,
     upload:{
       begin:`  upload:{
+`,
+      item:`    $domain: "$domain",
+`,
+      end:`  },
+`,
+    },
+    detail:{
+      begin:`  detail:{
 `,
       item:`    $domain: "$domain",
 `,
