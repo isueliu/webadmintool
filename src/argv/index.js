@@ -4,9 +4,9 @@ reolve the arv
 output a json of base config
 npm start -c "path/data.config.json" -o "path/of/the/target"
 **/
-
 const process = require('process');
 const path = require('path');
+
 const ConfigPathToken = '-c';
 const TargetPathToken = '-o';
 const DefaultConfigFile = './data.config.json';
@@ -20,25 +20,22 @@ const resolveHome = (inputPath) => {
   return path.resolve(inputPath);
 };
 
-const resolvePath = (inputPath) => resolveHome(inputPath);
-
 const resolveArgv = function() {
   const baseConfig = {
     configPath:path.resolve(DefaultConfigFile),
     targetPath:path.resolve(DefaultTargetDirectory)
   };
-  const argvMap = process.argv.reduce((sum, cur, idx, array) => {
+  const argvMap = process.argv.reduce((sum, cur, idx) => {
     sum[cur]= idx;
     return sum;
   },{});
   if (argvMap[ConfigPathToken]) {
-    baseConfig.configPath = resolvePath(process.argv[argvMap[ConfigPathToken] + 1]);
+    baseConfig.configPath = resolveHome(process.argv[argvMap[ConfigPathToken] + 1]);
   }
   if (argvMap[TargetPathToken]) {
-    baseConfig.targetPath = resolvePath(process.argv[argvMap[TargetPathToken] + 1]);
+    baseConfig.targetPath = resolveHome(process.argv[argvMap[TargetPathToken] + 1]);
   }
   return baseConfig;
 };
-
 
 exports.resolveArgv = resolveArgv;
